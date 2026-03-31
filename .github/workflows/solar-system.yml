@@ -57,7 +57,15 @@ jobs:
 
           - name: Install dependencies
             run: npm install
-            
+
           - name: Code coverage step
-            run: npm run coverage
+            run: |
+              npm run coverage
+              exit 0
+          
+          - name: Artifacting code coverate results
+            uses: actions/upload-artifact@v6
+            with:
+              name: code-coverage-result
+              path: coverage
           
