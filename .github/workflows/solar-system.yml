@@ -6,7 +6,6 @@ on:
     branches:
       - main
       - 'feature/*'
-
 env:
   MONGO_URI: 'mongodb+srv://supercluster.d83jj.mongodb.net/superData'
   MONGO_USERNAME: superuser
@@ -15,6 +14,7 @@ env:
 jobs:
     unit-testing:
         name: Unit Testing job
+        # if: github.ref_name == 'git/ref/main'
         strategy:
           matrix:
             node-version: [24]
@@ -36,10 +36,11 @@ jobs:
           run: npm install
     
         - name: Unit Testing
+          id: unit-testing-step
           run: npm test
           
         - name: Archive Test Result
-          if: failure() || success()
+          # if: failure() || success() || always() && (steps.unit-testing-step.outcome == 'success')
           uses: actions/upload-artifact@v6
           with:
             name: Mocha-Test-Result-${{matrix.node-version}}-${{matrix.os}}
