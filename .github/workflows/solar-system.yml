@@ -74,7 +74,7 @@ jobs:
           ports:
             - 27017:27017
           options:
-            -- name mongo
+            --name mongo
       container:
         image: node:18
       steps:
