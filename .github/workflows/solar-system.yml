@@ -16,7 +16,7 @@ jobs:
         name: Unit Testing job
         # if: github.ref_name == 'git/ref/main'
         env:
-          MONGO_URI: mongodb+srv://localhost:27017/superData
+          MONGO_URI: mongodb://localhost:27017/superData
           MONGO_USERNAME: non-prod-user
           MONGO_PASSWORD: non-prod-password
         services:
