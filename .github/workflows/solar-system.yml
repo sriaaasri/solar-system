@@ -106,10 +106,7 @@ jobs:
             tags: ${{ vars.DOCKER_USERNAME}}/solar-system:${{ github.sha }}
         
         - name: Test script
-          run: |
-            
-            echo "MONGO_USERNAME - $MONGO_USERNAME"
-            docker images
+          run: ./containerRunScript.sh
 
         
 
