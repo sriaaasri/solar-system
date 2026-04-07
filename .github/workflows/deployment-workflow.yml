@@ -9,17 +9,24 @@ jobs:
             - name: Checkout Repo
               uses: actions/checkout@v4
 
-            - name: Set up kubectl
-              id: install-kubectl
-              uses: azure/setup-kubectl@v4
-              with:
-                version: 'v1.26.0' # default is latest stable
+            # - name: Set up kubectl
+            #   id: install-kubectl
+            #   uses: azure/setup-kubectl@v4
+            #   with:
+            #     version: 'v1.26.0' # default is latest stable
 
-            - name: Set kubeConfig
-              uses: azure/k8s-set-context@v4
+            # - name: Set kubeConfig
+            #   uses: azure/k8s-set-context@v4
+            #   with:
+            #     method: kubeconfig
+            #     kubeconfig: ${{ secrets.KUBECONFIG }}
+
+            - name: Setup Minikube
+              uses: manusa/actions-setup-minikube@v2.16.1
               with:
-                method: kubeconfig
-                kubeconfig: ${{ secrets.KUBECONFIG }}
+                minikube version: 'v1.38.1'
+                kubernetes version: 'v1.35.2'
+                github token: ${{ secrets.GITHUB_TOKEN }}
             
             - name: Check kubectl installition
               run: |
