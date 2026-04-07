@@ -30,7 +30,7 @@ jobs:
             
             - name: Check kubectl installition
               run: |
-                  kubectl version --short
+                  kubectl version 
                   echo "___________________________________________________________________"
                   kubectl get nodes
 
