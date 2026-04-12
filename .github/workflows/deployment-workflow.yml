@@ -42,7 +42,27 @@ jobs:
                   kubectl get nodes
                   kubectl get deploy
                   kubectl get pods
-                  
+
+            - name: Saving Ingress IP as github env variable
+              run: |
+                echo "INGRESS_IP=$(kubectl -n ingress-nginx get services ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")" >> "$GITHUB_ENV"
+            
+            - name: Replace values in manifest files
+              uses: cschleiden/replace-tokens@v1
+              with:
+                tokenPrefix: '_{_'
+                tokenSuffix: '_}_'
+                files: '["kubernetes/development/*.yaml"]'
+              env:
+                NAMESPACE: ${{ vars.NAMESPACE}}
+                REPLICAS: 2
+                IMAGE: ${{ vars.DOCKER_USERNAME}}/solar-system:latest
+                DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME}}
+                INGRESS_IP: ${{ env.INGRESS_IP }}
+                
+            - name: Check manifest files after replacing placeholders
+              run: cat kubernetes/development/*.yaml
+
             # - name: Minikube status
             #   run: minikube status
 
