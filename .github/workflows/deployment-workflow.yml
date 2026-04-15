@@ -67,7 +67,7 @@ jobs:
 
             - name: Create namespace.
               run: |
-                kubectl create namespace ${{ vars.NAMESPACE }}
+                kubectl apply -f kubernetes/development/namespace.yaml
                 kubectl get ns
 
             - name: Create MongoDB secrets
