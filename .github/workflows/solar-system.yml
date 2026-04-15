@@ -6,11 +6,32 @@ on:
     branches:
       - main
       - 'feature/*'
+env:
+  MONGO_URI: ${{ vars.MONGO_URI }}
+  MONGO_USERNAME: ${{ vars.MONGO_USERNAME }}
+  MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
     
 jobs:
     unit-testing:
-        name: Unit Testing
-        runs-on: ubuntu-latest
+        name: Unit Testing job
+        # if: github.ref_name == 'git/ref/main'
+        env:
+          MONGO_URI: mongodb://localhost:27017/superData
+          MONGO_USERNAME: non-prod-user
+          MONGO_PASSWORD: non-prod-password
+        services:
+          mongo-db:
+            image: siddharth67/mongo-db:non-prod
+            ports:
+              - 27017:27017
+        strategy:
+          matrix:
+            node-version: [24]
+            os: [ubuntu-latest]
+            # exclude:
+            #   - node-version: 20
+            #     os: ubuntu-latest
+        runs-on: ${{ matrix.os }}
         steps:
         - name: Checkout Repository
           uses: actions/checkout@v4
@@ -18,16 +39,113 @@ jobs:
         - name: Setup NodeJS Version
           uses: actions/setup-node@v3
           with:
-            node-version: 20
+            node-version: ${{ matrix.node-version }}
+
+        - name: Cache npm packages/dependencies
+          uses: actions/cache@v5.0.4
+          with:
+            path: node_modules
+            key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+            
     
         - name: Install Dependencies
           run: npm install
     
         - name: Unit Testing
+          id: unit-testing-step
           run: npm test
           
-        - name: Archive Test Result
-          uses: actions/upload-artifact@v3
+        - name: Archive Test Result.
+          # if: failure() || success() || always() && (steps.unit-testing-step.outcome == 'success')
+          uses: actions/upload-artifact@v6
           with:
-            name: Mocha-Test-Result
+            name: Mocha-Test-Result-${{matrix.node-version}}-${{matrix.os}}
             path: test-results.xml
+    code-coverage:
+      name: Code Coverage
+      runs-on: ubuntu-latest
+      env:
+          MONGO_URI: mongodb://mongo:27017/superData
+          MONGO_USERNAME: non-prod-user
+          MONGO_PASSWORD: non-prod-password
+      services:
+        mongo-db:
+          image: siddharth67/mongo-db:non-prod
+          ports:
+            - 27017:27017
+          options:
+            --name mongo
+      container:
+        image: node:18
+      steps:
+          - name: Checkout repo
+            uses: actions/checkout@v4
+
+          # - name: Install node
+          #   uses: actions/setup-node@v3
+          #   with:
+          #     node-version: 24
+
+          - name: Create cache for node Dependencies
+            uses: actions/cache@v5.0.4
+            with:
+              path: node_modules
+              key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+
+          - name: Install dependencies
+            run: npm install
+
+          - name: Code coverage step
+            run: |
+              npm run coverage
+            continue-on-error: true
+          
+          - name: Artifacting code coverate results
+            uses: actions/upload-artifact@v6
+            with:
+              name: code-coverage-result
+              path: coverage
+              retention-days: 5
+    Docker-containerization:
+      runs-on: ubuntu-latest
+      needs: [unit-testing , code-coverage]
+      steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+              
+            - name: Docker Login
+              uses: docker/login-action@v4.1.0
+              with:
+                username: ${{ vars.DOCKER_USERNAME }}
+                password: ${{ secrets.DOCKER_PASSWORD }}
+
+            - name: Github registry Login
+              uses: docker/login-action@v4.1.0
+              with:
+                registry: ghcr.io
+                username: ${{ github.repository_owner }}
+                password: ${{ secrets.GITHUB_TOKEN }}
+          
+            - name: Docker Build for testing
+              uses: docker/build-push-action@v7
+              with:
+                context: .
+                push: false
+                tags: ${{ vars.DOCKER_USERNAME}}/solar-system:latest
+            
+            - name: Test script
+              run: |
+                export MONGO_USERNAME=${{ vars.MONGO_USERNAME }}
+                export MONGO_URI=${{ vars.MONGO_URI }}
+                export MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
+                export IMAGE=${{ vars.DOCKER_USERNAME}}/solar-system:latest
+                chmod +x containerRunScript.sh
+                ./containerRunScript.sh
+            - name: Push image - github container & Docker hub
+              uses: docker/build-push-action@v7
+              with:
+                push: true
+                context: .
+                tags: |
+                     ${{ vars.DOCKER_USERNAME}}/solar-system:latest
+                     ghcr.io/${{ github.repository_owner}}/solar-system:latest
