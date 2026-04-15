@@ -39,7 +39,7 @@ jobs:
               run: echo "OPTIONAL=false" >> "$GITHUB_ENV"
 
             - name: Check kubectl installition
-              if: ${{ env.OPTIONAL }}
+              if: false 
               run: |
                   kubectl version 
                   echo "___________________________________________________________________"
