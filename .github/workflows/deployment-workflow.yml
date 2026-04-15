@@ -112,7 +112,7 @@ jobs:
     
     prod-deployment:
         runs-on: ubuntu-latest
-        # if: github.ref_name == 'git/ref/main'
+        if: github.ref == 'refs/heads/main'
         environment:
           name: Production
           url: https://${{ steps.set-ingress-hostname.outputs.INGRESS_HOSTNAME }}
@@ -208,7 +208,7 @@ jobs:
               
     prod-Integration_testing:
       runs-on: ubuntu-latest
-      # if: github.ref_name == 'git/ref/main'
+      if: github.ref == 'refs/heads/main'
       needs: [prod-deployment]
       steps:
         - name: Validating website status
