@@ -57,7 +57,7 @@ jobs:
                   INGRESS_IP=$(kubectl -n ingress-nginx get services ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress[0].hostname}")
                   echo "Plain hostname: $INGRESS_IP"
                   ENCODED_IP=$(echo -n "$INGRESS_IP" | base64)
-                  echo "INGRESS_HOSTNAME='$ENCODED_IP'" >> "$GITHUB_OUTPUT"
+                  echo "INGRESS_HOSTNAME=$ENCODED_IP" >> "$GITHUB_OUTPUT"
 
             
             - name: Replace values in manifest files
@@ -124,7 +124,7 @@ jobs:
             echo $URL
             DECODED_URL=$(echo "$URL" | base64 -d )
             echo $DECODED_URL
-            curl http://$DECODED_URL/live
+            curl http://${DECODED_URL}.amazonaws.com/live
 
             
 
