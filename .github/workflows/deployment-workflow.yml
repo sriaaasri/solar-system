@@ -122,6 +122,9 @@ jobs:
             - name: Checkout Repo.
               uses: actions/checkout@v4
 
+            - name: print Github ref
+              run: echo ${{ github.ref }}
+
             - name: Configure AWS Credentials
               uses: aws-actions/configure-aws-credentials@v6.1.0
               with:
