@@ -105,8 +105,11 @@ jobs:
       needs: [deployment]
       steps:
         - name: Validating website status
+          env:
+            URL: http://aebfb7137d8ef4d0fa7c2d3f3486da47-792396812.ap-south-1.elb.amazonaws.com
           run: |
-            echo ${{env.INGRESS_IP}}
+            echo $URL
+            curl $URL/live
 
             
 
