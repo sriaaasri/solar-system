@@ -6,7 +6,7 @@ jobs:
     deployment:
         runs-on: ubuntu-latest
         outputs:
-          INGRESS_HOSTNAME: ${{ steps.set-ingress-hostname.outputs.INGRESS_IP }}
+          INGRESS_HOSTNAME: ${{ steps.set-ingress-hostname.outputs.INGRESS_HOSTNAME }}
         steps:
             - name: Checkout Repo
               uses: actions/checkout@v4
@@ -54,7 +54,11 @@ jobs:
             - name: Saving Ingress IP as github env variable
               id: set-ingress-hostname
               run: |
-                echo "INGRESS_IP=$(kubectl -n ingress-nginx get services ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress[0].hostname}")" >> "$GITHUB_OUTPUT"
+                  INGRESS_IP=$(kubectl -n ingress-nginx get services ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress[0].hostname}")
+                  echo "Plain hostname: $INGRESS_IP"
+                  ENCODED_IP=$(echo "$INGRESS_IP" | base64)
+                  echo "INGRESS_HOSTNAME=$ENCODED_IP" >> "$GITHUB_OUTPUT"
+
             
             - name: Replace values in manifest files
               uses: cschleiden/replace-tokens@v1
@@ -118,7 +122,8 @@ jobs:
             URL: ${{ needs.deployment.outputs.INGRESS_HOSTNAME }}
           run: |
             echo $URL
-            curl $URL/live
+            DECODED_URL=$(echo "$URL" | base64 -d )
+            curl $DECODED_URL/live
 
             
 
