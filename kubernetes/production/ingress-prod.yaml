@@ -5,8 +5,8 @@ metadata:
   namespace: _{_NAMESPACE_}_
 spec:
   ingressClassName: nginx
-    rules:
-    - http:
+  rules:
+  - http:
       paths:
       - path: /
         pathType: Prefix
