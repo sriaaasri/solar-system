@@ -79,6 +79,9 @@ jobs:
             - name: Deploy to k8s cluster
               run: kubectl apply -f kubernetes/development
 
+            - name: Validate the deployments resources
+              run: kubectl get pods -n ${{ vars.NAMESPACE }}
+
             # - name: Minikube status
             #   run: minikube status
 
