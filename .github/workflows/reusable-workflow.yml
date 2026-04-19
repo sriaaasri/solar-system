@@ -11,6 +11,10 @@ on:
       secrets:
         AWS_REGION:
           required: true
+      outputs:
+        URL:
+          value: ${{ jobs.intro_step.outputs.url }}
+
 jobs:
   intro_step:
     runs-on: ubuntu-latest
