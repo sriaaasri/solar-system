@@ -5,10 +5,13 @@ on:
         PROJECT:
             required: true
             type: string
+        VERSION:
+          required: false
+          type: number
 jobs:
     intro_step:
         runs-on: ubuntu-latest
         steps:
           - name: First_step
-            run: echo "This is ${{ inputs.PROJECT }}"
+            run: echo "This is ${{ inputs.PROJECT }} of version - ${{ inputs.VERSION }}"
     
