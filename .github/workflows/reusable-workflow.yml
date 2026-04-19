@@ -8,6 +8,9 @@ on:
         VERSION:
           required: false
           type: number
+      secrets:
+        AWS_REGION:
+          required: false
 jobs:
     intro_step:
         runs-on: ubuntu-latest
