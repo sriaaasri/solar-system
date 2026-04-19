@@ -1,0 +1,14 @@
+name: Reusable Workflow
+on:
+    workflow_call:
+      inputs:
+        PROJECT:
+            required: true
+            type: string
+jobs:
+    intro_step:
+        runs-on: ubuntu-latest
+        steps:
+          - name: First_step
+            run: echo "This is ${{ inputs.PROJECT }}"
+    
